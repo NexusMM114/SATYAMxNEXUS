@@ -3,153 +3,174 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Promo Terminal | Nexus Hub</title>
+    <title>Promo Terminal | Satyamxnexus</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Inter:wght@400;600;700&display=swap');
         body { background: #050505; color: white; font-family: 'Inter', sans-serif; overflow-x: hidden; }
         .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; }
-        #loader { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 100; align-items: center; justify-content: center; flex-direction: column; }
-        .scanner { width: 100%; height: 2px; background: #00f2ff; position: absolute; animation: scan 2s infinite; }
-        @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
-        /* Professional Input Styling */
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        
+        /* High-Tech Loader */
+        #loader { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 100; align-items: center; justify-content: center; flex-direction: column; }
+        .scanner-bar { width: 100%; height: 2px; background: #00f2ff; position: absolute; box-shadow: 0 0 15px #00f2ff; animation: scan 2s infinite linear; }
+        @keyframes scan { 0% { top: 0%; } 100% { top: 100%; } }
     </style>
 </head>
 <body class="p-6 pb-24" oncontextmenu="return false;">
+
     <div id="loader">
-        <div class="relative w-40 h-40 border border-cyan-500/20 mb-6"><div class="scanner"></div><i class="fas fa-microchip text-4xl text-cyan-400 flex items-center justify-center h-full"></i></div>
-        <div class="text-cyan-400 font-bold tracking-[0.3em] uppercase text-xs text-center px-4">Encoding Data & Generating Clipboard...</div>
+        <div class="relative w-48 h-48 border border-cyan-500/20 mb-8 overflow-hidden">
+            <div class="scanner-bar"></div>
+            <div class="flex items-center justify-center h-full">
+                <i class="fas fa-satellite-dish text-5xl text-cyan-400 animate-pulse"></i>
+            </div>
+        </div>
+        <div class="text-cyan-400 font-bold tracking-[0.4em] text-[10px] uppercase">Syncing Transaction Data...</div>
     </div>
 
     <div class="max-w-4xl mx-auto">
         <header class="flex justify-between items-center mb-10">
-            <a href="index.html" class="text-cyan-400 text-xs font-bold uppercase"><i class="fas fa-arrow-left mr-2"></i> Home</a>
-            <span class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Manual Order Terminal</span>
+            <a href="index.html" class="text-cyan-400 font-bold text-xs uppercase tracking-widest"><i class="fas fa-arrow-left mr-2"></i> Home</a>
+            <div class="bg-cyan-500/10 px-3 py-1 rounded border border-cyan-500/20">
+                <span class="text-[10px] font-bold text-cyan-400 uppercase tracking-tighter">Terminal v2.0</span>
+            </div>
         </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <button onclick="setType('BGMI Premium', 2.0)" class="glass p-5 border-l-4 border-yellow-500 text-left hover:scale-105 transition-all">
-                <h3 class="font-bold">BGMI Premium</h3><p class="text-yellow-500 font-bold">₹2.0/member</p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+            <button onclick="updateTier('BGMI Premium', 2.0)" class="glass p-5 text-left border-l-4 border-yellow-500 hover:bg-yellow-500/5 transition-all">
+                <p class="text-[9px] text-gray-500 font-bold uppercase tracking-widest">Premium</p>
+                <h3 class="font-bold text-white">BGMI Tier 1</h3>
+                <p class="text-yellow-500 font-bold">₹2.0/Mem</p>
             </button>
-            <button onclick="setType('BGMI Normal', 1.5)" class="glass p-5 border-l-4 border-cyan-500 text-left hover:scale-105 transition-all">
-                <h3 class="font-bold">BGMI Normal</h3><p class="text-cyan-500 font-bold">₹1.5/member</p>
+            <button onclick="updateTier('BGMI Normal', 1.5)" class="glass p-5 text-left border-l-4 border-cyan-500 hover:bg-cyan-500/5 transition-all">
+                <p class="text-[9px] text-gray-500 font-bold uppercase tracking-widest">Standard</p>
+                <h3 class="font-bold text-white">BGMI Tier 2</h3>
+                <p class="text-cyan-400 font-bold">₹1.5/Mem</p>
             </button>
-            <button onclick="setType('Free Fire', 1.5)" class="glass p-5 border-l-4 border-red-500 text-left hover:scale-105 transition-all">
-                <h3 class="font-bold">Free Fire</h3><p class="text-red-500 font-bold">₹1.5/member</p>
+            <button onclick="updateTier('Free Fire', 1.5)" class="glass p-5 text-left border-l-4 border-red-600 hover:bg-red-600/5 transition-all">
+                <p class="text-[9px] text-gray-500 font-bold uppercase tracking-widest">Esports</p>
+                <h3 class="font-bold text-white">Free Fire</h3>
+                <p class="text-red-500 font-bold">₹1.5/Mem</p>
             </button>
         </div>
 
-        <div id="promoUI" class="glass p-8 max-w-xl mx-auto border-t-2 border-cyan-500 mb-10">
-            <h3 id="srvTitle" class="text-xl font-bold mb-6 text-white uppercase tracking-tighter">Select Service</h3>
+        <div class="glass p-8 max-w-xl mx-auto border-t-2 border-cyan-500 shadow-2xl shadow-cyan-500/5">
+            <h3 id="srvName" class="text-2xl font-bold mb-8 text-white tracking-tighter uppercase">Select A Service</h3>
+            
             <div class="space-y-6">
-                
                 <div>
-                    <label class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Enter Custom Quantity (10 - 1000)</label>
+                    <label class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Enter Any Quantity (10 - 1000)</label>
                     <div class="relative mt-2">
-                        <input type="number" id="qty" placeholder="e.g. 177" min="10" max="1000" oninput="calc()" 
-                            class="w-full bg-black p-4 rounded-xl border border-white/10 text-cyan-400 font-bold outline-none focus:border-cyan-500 text-lg">
-                        <span class="absolute right-4 top-4 text-gray-600 text-xs uppercase font-bold">Members</span>
+                        <input type="number" id="qtyInput" placeholder="Ex: 177" oninput="calculate()"
+                            class="w-full bg-black/50 border border-white/10 p-5 rounded-2xl outline-none focus:border-cyan-500 text-cyan-400 text-2xl font-bold">
+                        <span class="absolute right-6 top-6 text-gray-600 font-bold text-xs uppercase">Members</span>
                     </div>
                 </div>
 
                 <div>
-                    <label class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Target Channel/Group Link</label>
-                    <input type="url" id="link" placeholder="https://t.me/example" class="w-full bg-black p-4 rounded-xl border border-white/10 outline-none mt-2 focus:border-cyan-500">
+                    <label class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Customer Channel/Group Link</label>
+                    <input type="url" id="targetLink" placeholder="https://t.me/yourname"
+                        class="w-full bg-black/50 border border-white/10 p-4 rounded-xl mt-2 outline-none focus:border-cyan-500">
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Gateway Server</label>
-                        <select id="srv" onchange="syncUpi()" class="w-full bg-black p-4 rounded-xl border border-white/10 outline-none text-white mt-2">
-                            <option value="1">Server 1</option>
-                            <option value="2">Server 2</option>
+                        <label class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Payment Server</label>
+                        <select id="srvSelect" onchange="refreshUpi()" class="w-full bg-black border border-white/10 p-4 rounded-xl mt-2 outline-none text-sm">
+                            <option value="1">Server 01</option>
+                            <option value="2">Server 02</option>
                         </select>
                     </div>
                     <div class="text-right">
-                        <label class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Total Bill</label>
-                        <div class="text-3xl font-bold text-green-400 mt-1" id="price">₹0.0</div>
+                        <label class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Live Total</label>
+                        <div id="livePrice" class="text-3xl font-bold text-green-400 mt-2">₹0.0</div>
                     </div>
                 </div>
 
-                <div class="bg-cyan-500/5 p-4 rounded-xl border border-cyan-500/10 flex justify-between items-center">
-                    <div class="flex flex-col">
-                        <span class="text-[9px] text-gray-500 uppercase font-bold">Pay to UPI</span>
-                        <span id="upiId" class="text-xs font-mono text-cyan-400">Select Server</span>
+                <div class="bg-cyan-500/5 border border-cyan-500/20 p-4 rounded-2xl flex justify-between items-center">
+                    <div class="overflow-hidden">
+                        <p class="text-[9px] font-bold text-cyan-500 uppercase tracking-widest">Payable UPI Address</p>
+                        <p id="upiDisplay" class="font-mono text-sm mt-1 uppercase text-gray-300 truncate">Select Server...</p>
                     </div>
-                    <button onclick="copyUpi()" class="bg-cyan-600/20 text-cyan-400 text-[10px] px-4 py-2 rounded-lg font-bold border border-cyan-500/30">COPY</button>
+                    <button onclick="copyUpi()" class="bg-cyan-600 text-[10px] font-bold px-4 py-2 rounded-lg uppercase transition-transform active:scale-95">Copy</button>
                 </div>
 
-                <input type="text" id="utr" placeholder="ENTER 12-DIGIT TRANSACTION UTR" 
-                    class="w-full bg-black border-2 border-cyan-500/30 p-4 rounded-xl text-center font-bold outline-none tracking-widest focus:border-cyan-500">
+                <input type="text" id="utrCode" placeholder="ENTER 12-DIGIT TRANSACTION UTR" maxlength="12"
+                    class="w-full bg-black border-2 border-cyan-500/30 p-4 rounded-xl text-center font-bold outline-none focus:border-cyan-500 tracking-widest uppercase">
 
-                <button onclick="submitPromo()" class="w-full bg-white text-black py-4 rounded-xl font-bold uppercase tracking-widest hover:bg-cyan-400 transition-all shadow-lg shadow-cyan-500/10">Submit Proof & Redirect</button>
+                <button onclick="executeOrder()" class="w-full bg-white text-black py-5 rounded-2xl font-bold uppercase tracking-widest text-xs hover:bg-cyan-400 transition-all shadow-lg shadow-cyan-500/10">Submit Order Details</button>
             </div>
         </div>
     </div>
 
     <script>
-        let currentRate = 0, currentName = "";
+        let currentRate = 0;
+        let selectedService = "";
 
-        function setType(name, rate) { 
-            currentName = name; 
-            currentRate = rate; 
-            document.getElementById('srvTitle').innerText = name; 
-            calc(); 
-            syncUpi(); 
+        function updateTier(name, rate) {
+            currentRate = rate;
+            selectedService = name;
+            document.getElementById('srvName').innerText = name;
+            calculate();
+            refreshUpi();
         }
 
-        function calc() {
-            let qtyBox = document.getElementById('qty');
-            let val = parseFloat(qtyBox.value);
+        function calculate() {
+            let input = document.getElementById('qtyInput');
+            let qty = parseInt(input.value);
 
-            // Validation logic
-            if(val > 1000) { qtyBox.value = 1000; val = 1000; }
+            // Validation: Max 1000
+            if (qty > 1000) { input.value = 1000; qty = 1000; }
             
-            const total = (val > 0) ? (val * currentRate) : 0;
-            document.getElementById('price').innerText = '₹' + total.toFixed(1);
+            const total = (qty > 0) ? (qty * currentRate) : 0;
+            document.getElementById('livePrice').innerText = '₹' + total.toFixed(1);
         }
 
-        function syncUpi() {
-            const s = document.getElementById('srv').value;
-            document.getElementById('upiId').innerText = localStorage.getItem('upi'+s) || (s==1?"bobby.jaiswal0893@okicici":"Lavyanshboss@fam");
+        function refreshUpi() {
+            const s = document.getElementById('srvSelect').value;
+            const upi = localStorage.getItem('upi' + s) || (s == 1 ? "bobby.jaiswal0893@okicici" : "Lavyanshboss@fam");
+            document.getElementById('upiDisplay').innerText = upi;
         }
 
-        function copyUpi() { 
-            navigator.clipboard.writeText(document.getElementById('upiId').innerText); 
-            alert("✅ UPI Copied Successfully!"); 
+        function copyUpi() {
+            const upi = document.getElementById('upiDisplay').innerText;
+            if(upi.includes("Select")) return;
+            navigator.clipboard.writeText(upi);
+            alert("UPI Copied!");
         }
 
-        function submitPromo() {
-            const l = document.getElementById('link').value;
-            const u = document.getElementById('utr').value;
-            const q = document.getElementById('qty').value;
-            const s = document.getElementById('srv').value;
+        function executeOrder() {
+            const qty = document.getElementById('qtyInput').value;
+            const link = document.getElementById('targetLink').value;
+            const utr = document.getElementById('utrCode').value;
+            const srv = document.getElementById('srvSelect').value;
 
-            if(!l || u.length < 10 || q < 10) {
-                alert("❌ ERROR: Please enter valid link, UTR, and minimum 10 members!");
+            if(!qty || qty < 10 || !link || utr.length < 10) {
+                alert("❌ Fill all details correctly! Min quantity is 10.");
                 return;
             }
 
             document.getElementById('loader').style.display = 'flex';
             
-            // Format message for clipboard
-            const msg = `✨ SATYAMXNEXUS ORDER ✨\n\n` +
-                        `📦 Service: ${currentName}\n` +
-                        `👥 Custom Qty: ${q} Members\n` +
-                        `🔗 Link: ${l}\n` +
-                        `💰 Total Bill: ${document.getElementById('price').innerText}\n` +
-                        `🆔 UTR ID: ${u}\n\n` +
-                        `Status: Payment Sent. Please verify.`;
+            const message = `🚀 PROMO ORDER SUBMITTED 🚀\n\n` +
+                            `📦 Plan: ${selectedService}\n` +
+                            `👥 Custom Quantity: ${qty} Members\n` +
+                            `🔗 Channel: ${link}\n` +
+                            `💰 Total Paid: ${document.getElementById('livePrice').innerText}\n` +
+                            `🆔 UTR ID: ${utr}\n\n` +
+                            `Payment complete. Please start promotion.`;
 
             setTimeout(() => {
-                navigator.clipboard.writeText(msg).then(() => {
-                    window.location.href = (s == "1") ? "https://t.me/SATYAM_FF_99" : "https://t.me/NexusMM";
+                navigator.clipboard.writeText(message).then(() => {
+                    const targetAdmin = (srv == "1") ? "https://t.me/SATYAM_FF_99" : "https://t.me/NexusMM";
+                    window.location.href = targetAdmin;
                 });
             }, 2500);
         }
 
-        window.onload = () => setType('BGMI Normal', 1.5);
+        window.onload = () => updateTier('BGMI Normal', 1.5);
     </script>
 </body>
 </html>
