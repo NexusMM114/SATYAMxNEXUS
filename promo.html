@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Promo Terminal | Nexus Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background: #050505; color: white; font-family: 'Inter', sans-serif; -webkit-user-select: none; user-select: none; }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; }
+        #loader { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 100; align-items: center; justify-content: center; flex-direction: column; }
+        .scanner { width: 100%; height: 2px; background: #00f2ff; position: absolute; animation: scan 2s infinite; }
+        @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
+    </style>
+</head>
+<body class="p-6" oncontextmenu="return false;">
+    <div id="loader">
+        <div class="relative w-40 h-40 border border-cyan-500/20 mb-6">
+            <div class="scanner"></div>
+            <i class="fas fa-microchip text-4xl text-cyan-400 flex items-center justify-center h-full animate-pulse"></i>
+        </div>
+        <div class="text-cyan-400 font-bold tracking-[0.3em] uppercase text-xs">Verifying Transaction</div>
+    </div>
+
+    <div class="max-w-4xl mx-auto">
+        <a href="index.html" class="text-cyan-400 text-xs font-bold uppercase mb-8 inline-block"><i class="fas fa-arrow-left mr-2"></i> Home</a>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <button onclick="setType('BGMI Premium', 2.0)" class="glass p-5 border-l-4 border-yellow-500 text-left">
+                <h3 class="font-bold">BGMI Premium</h3><p class="text-yellow-500">₹2.0/member</p>
+            </button>
+            <button onclick="setType('BGMI Normal', 1.5)" class="glass p-5 border-l-4 border-cyan-500 text-left">
+                <h3 class="font-bold">BGMI Normal</h3><p class="text-cyan-500">₹1.5/member</p>
+            </button>
+            <button onclick="setType('Free Fire', 1.5)" class="glass p-5 border-l-4 border-red-500 text-left">
+                <h3 class="font-bold">Free Fire</h3><p class="text-red-500">₹1.5/member</p>
+            </button>
+        </div>
+
+        <div id="promoUI" class="glass p-8 max-w-xl mx-auto border-t-2 border-cyan-500">
+            <h3 id="srvTitle" class="text-xl font-bold mb-6">Select Service</h3>
+            <div class="space-y-4">
+                <label class="text-[10px] text-gray-500 font-bold uppercase">Quantity (10 - 1000)</label>
+                <input type="number" id="qty" value="100" min="10" max="1000" oninput="calc()" class="w-full bg-black p-4 rounded-xl border border-white/10 text-cyan-400 font-bold outline-none">
+                <input type="url" id="link" placeholder="Customer Channel/Group Link" class="w-full bg-black p-4 rounded-xl border border-white/10 outline-none">
+                <select id="srv" onchange="syncUpi()" class="w-full bg-black p-4 rounded-xl border border-white/10 outline-none"><option value="1">Server 1</option><option value="2">Server 2</option></select>
+                <div class="bg-cyan-500/5 p-4 rounded-xl flex justify-between font-mono text-xs"><span id="upiId">Loading...</span><button onclick="copyUpi()" class="text-cyan-400">COPY</button></div>
+                <div class="text-3xl font-bold text-green-400 text-right" id="price">₹0</div>
+                <input type="text" id="utr" placeholder="12-DIGIT UTR" class="w-full bg-black border-2 border-cyan-500/30 p-4 rounded-xl text-center font-bold outline-none tracking-widest">
+                <button onclick="submitPromo()" class="w-full bg-white text-black py-4 rounded-xl font-bold uppercase tracking-widest">Confirm & Redirect</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let r = 0, n = "";
+        function setType(name, rate) { n = name; r = rate; document.getElementById('srvTitle').innerText = name; calc(); syncUpi(); }
+        function calc() {
+            let q = document.getElementById('qty');
+            if(q.value > 1000) q.value = 1000; if(q.value < 10) q.value = 10;
+            document.getElementById('price').innerText = '₹' + (q.value * r).toFixed(0);
+        }
+        function syncUpi() {
+            const s = document.getElementById('srv').value;
+            document.getElementById('upiId').innerText = localStorage.getItem('upi'+s) || (s==1?"bobby.jaiswal0893@okicici":"Lavyanshboss@fam");
+        }
+        function copyUpi() { navigator.clipboard.writeText(document.getElementById('upiId').innerText); alert("UPI Copied!"); }
+        function submitPromo() {
+            const l = document.getElementById('link').value, u = document.getElementById('utr').value;
+            if(!l || u.length < 10) return alert("Fill all details correctly!");
+            document.getElementById('loader').style.display = 'flex';
+            const msg = `✨ NEW PROMO ✨\n📦 Service: ${n}\n👥 Qty: ${document.getElementById('qty').value}\n🔗 Link: ${l}\n🆔 UTR: ${u}\n💰 Paid: ${document.getElementById('price').innerText}`;
+            setTimeout(() => {
+                navigator.clipboard.writeText(msg).then(() => {
+                    const s = document.getElementById('srv').value;
+                    window.location.href = (s == "1") ? "https://t.me/SATYAM_FF_99" : "https://t.me/NexusMM";
+                });
+            }, 3000);
+        }
+        window.onload = () => setType('BGMI Normal', 1.5);
+        document.onkeydown = (e) => { if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && e.keyCode == 73) || (e.ctrlKey && e.keyCode == 85)) return false; };
+    </script>
+</body>
+</html>

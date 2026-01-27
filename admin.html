@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Master Terminal | Nexus</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>body { background: #000; color: #fff; }</style>
+</head>
+<body class="p-10">
+    <div id="login" class="max-w-xs mx-auto mt-20 p-8 bg-zinc-900 rounded-2xl text-center border border-zinc-800">
+        <h2 class="font-bold text-cyan-400 mb-6 uppercase">Nexus Security</h2>
+        <input type="password" id="pass" class="w-full bg-black border border-zinc-800 p-3 rounded mb-4 text-center outline-none" placeholder="Master Key">
+        <button onclick="auth()" class="w-full bg-cyan-600 py-2 rounded font-bold">ACCESS</button>
+    </div>
+
+    <div id="dash" class="hidden max-w-4xl mx-auto">
+        <div class="flex justify-between items-center mb-10 border-b border-zinc-800 pb-5">
+            <h1 class="font-bold text-xl text-cyan-400 tracking-widest uppercase">Master Admin</h1>
+            <button onclick="location.reload()" class="text-xs text-red-500 font-bold uppercase">Lock Terminal</button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="bg-zinc-900 p-6 rounded-2xl border border-zinc-800">
+                <h3 class="font-bold mb-4 uppercase text-xs text-gray-400">Server 01 UPI</h3>
+                <input type="text" id="u1" class="w-full bg-black border border-zinc-800 p-4 rounded-xl mb-4 text-cyan-400 font-mono text-sm">
+                <button onclick="save(1)" class="w-full bg-cyan-600 py-2 rounded font-bold uppercase text-[10px]">Update Server 1</button>
+            </div>
+            <div class="bg-zinc-900 p-6 rounded-2xl border border-zinc-800">
+                <h3 class="font-bold mb-4 uppercase text-xs text-gray-400">Server 02 UPI</h3>
+                <input type="text" id="u2" class="w-full bg-black border border-zinc-800 p-4 rounded-xl mb-4 text-purple-400 font-mono text-sm">
+                <button onclick="save(2)" class="w-full bg-purple-600 py-2 rounded font-bold uppercase text-[10px]">Update Server 2</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function auth() {
+            if(document.getElementById('pass').value === "Satyam@123") {
+                document.getElementById('login').style.display = 'none';
+                document.getElementById('dash').style.display = 'block';
+                document.getElementById('u1').value = localStorage.getItem('upi1') || "bobby.jaiswal0893@okicici";
+                document.getElementById('u2').value = localStorage.getItem('upi2') || "Lavyanshboss@fam";
+            } else { alert("Unauthorized Key!"); }
+        }
+        function save(n) {
+            localStorage.setItem('upi'+n, document.getElementById('u'+n).value);
+            alert("SUCCESS: Gateway " + n + " Updated.");
+        }
+    </script>
+</body>
+</html>
