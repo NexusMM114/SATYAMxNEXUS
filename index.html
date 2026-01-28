@@ -3,101 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SATYAMxNEXUS HUB | Official</title>
+    <title>Satyamxnexus Hub | Official</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Inter:wght@400;600&display=swap');
-        
-        /* Fixed scrolling: Removed overflow:hidden */
-        body { 
-            background: #050505; 
-            color: white; 
-            font-family: 'Inter', sans-serif; 
-            overflow-x: hidden; 
-            min-height: 100vh;
-            -webkit-user-select: none; 
-            user-select: none; 
-        }
-
-        .mesh-bg { 
-            position: fixed; 
-            top: 0; left: 0; width: 100%; height: 100%; 
-            z-index: -1; 
-            background: radial-gradient(circle at 0% 0%, rgba(112, 0, 255, 0.15) 0%, transparent 50%), 
-                        radial-gradient(circle at 100% 100%, rgba(0, 242, 255, 0.1) 0%, transparent 50%); 
-        }
-
-        .glass { 
-            background: rgba(255, 255, 255, 0.03); 
-            backdrop-filter: blur(20px); 
-            border: 1px solid rgba(255, 255, 255, 0.08); 
-            border-radius: 24px; 
-            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
-        }
-
-        .glass:hover { 
-            border-color: rgba(0, 242, 255, 0.5); 
-            transform: translateY(-5px); 
-            box-shadow: 0 10px 30px -10px rgba(0, 242, 255, 0.3); 
-        }
-
+        body { background: #050505; color: white; font-family: 'Inter', sans-serif; overflow-x: hidden; min-height: 100vh; -webkit-user-select: none; user-select: none; }
+        .mesh-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: radial-gradient(circle at 0% 0%, rgba(112, 0, 255, 0.15) 0%, transparent 50%), radial-gradient(circle at 100% 100%, rgba(0, 242, 255, 0.1) 0%, transparent 50%); }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px; transition: 0.3s; }
+        .glass:hover { border-color: rgba(0, 242, 255, 0.5); transform: translateY(-5px); box-shadow: 0 10px 30px -10px rgba(0, 242, 255, 0.3); }
         .font-header { font-family: 'Syncopate', sans-serif; }
     </style>
 </head>
 <body oncontextmenu="return false;">
-    <div class="mesh-bg"></div>
+    <div id="maint-screen" class="fixed inset-0 bg-black z-[9999] hidden flex-col items-center justify-center text-center p-6">
+        <i class="fas fa-tools text-6xl text-yellow-500 animate-bounce mb-6"></i>
+        <h2 class="font-header text-xl text-white mb-2 uppercase">System Maintenance</h2>
+        <p class="text-gray-500 text-xs uppercase tracking-widest">Upgrading Bank Nodes. Back soon.</p>
+    </div>
 
+    <div class="mesh-bg"></div>
     <nav class="p-6 flex justify-between items-center max-w-6xl mx-auto">
-        <h1 class="font-header text-cyan-400 tracking-tighter text-xl">SATYAMxNEXUS HUB</h1>
-        <div class="flex items-center gap-2">
-            <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-            <span class="text-[10px] font-bold uppercase tracking-widest text-green-500">System Live</span>
-        </div>
+        <h1 class="font-header text-cyan-400 tracking-tighter text-xl">NEXUS HUB</h1>
     </nav>
 
-    <main class="max-w-4xl mx-auto px-6 py-12 lg:py-20 text-center">
-        <h2 class="font-header text-4xl lg:text-7xl mb-6 leading-tight uppercase animate__animated animate__fadeIn">
-            The Next Gen<br>
-            <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-600">Telegram Hub</span>
-        </h2>
-        <p class="text-gray-400 text-lg mb-12">Elite promotion strategies and premium ID fabrication.</p>
-
+    <main class="max-w-4xl mx-auto px-6 py-12 text-center">
+        <h2 class="font-header text-4xl lg:text-7xl mb-6 uppercase animate__animated animate__fadeIn">The Next Gen<br><span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-600">Telegram Hub</span></h2>
+        
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
-            <a href="promo.html" class="glass p-10 block animate__animated animate__fadeInLeft">
+            <a href="promo.html" class="glass p-10 block">
                 <i class="fas fa-rocket text-4xl text-cyan-400 mb-4"></i>
-                <h3 class="font-header text-lg mb-2 text-white">Member Promo</h3>
-                <p class="text-xs text-gray-500 font-bold uppercase tracking-widest">Growth Terminal</p>
+                <h3 class="font-header text-lg mb-2">Member Promo</h3>
+                <p class="text-xs text-gray-500 font-bold uppercase tracking-widest text-white">Growth Terminal</p>
             </a>
-            <a href="tid.html" class="glass p-10 block animate__animated animate__fadeInRight">
+            <a href="tid.html" class="glass p-10 block">
                 <i class="fas fa-user-shield text-4xl text-purple-400 mb-4"></i>
                 <h3 class="font-header text-lg mb-2 text-white">ID Fabrication</h3>
                 <p class="text-xs text-gray-500 font-bold uppercase tracking-widest">Custom Engineering</p>
             </a>
         </div>
 
-        <div class="mt-12 glass p-8 border-t-2 border-orange-500 animate__animated animate__fadeInUp">
-            <div class="flex flex-col md:flex-row justify-between items-center gap-6 text-center md:text-left">
+        <div class="mt-12 glass p-8 border-t-2 border-orange-500">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-6">
                 <div class="text-left">
-                    <span class="text-[10px] bg-orange-500/10 text-orange-500 px-2 py-1 rounded font-bold uppercase tracking-widest">Extra Services</span>
-                    <h3 class="font-header text-xl mt-2 uppercase">Nexus Graphics Studio</h3>
-                    <p class="text-gray-500 text-sm mt-1">Need a professional GFX logo, banner, or esport design?</p>
+                    <span class="text-[10px] bg-orange-500/10 text-orange-500 px-2 py-1 rounded font-bold uppercase">Extra Services</span>
+                    <h3 class="font-header text-xl mt-2">Nexus Graphics</h3>
+                    <p class="text-gray-500 text-sm mt-1 text-white">Professional GFX logos & banners.</p>
                 </div>
-                <a href="https://nexuslogo.shop" target="_blank" class="bg-orange-600 hover:bg-orange-500 text-white px-8 py-3 rounded-xl font-bold uppercase text-xs tracking-widest transition-all w-full md:w-auto text-center">
-                    Visit nexuslogo.shop <i class="fas fa-external-link-alt ml-2"></i>
-                </a>
+                <a href="https://nexuslogo.shop" target="_blank" class="bg-orange-600 hover:bg-orange-500 text-white px-8 py-3 rounded-xl font-bold uppercase text-xs tracking-widest transition-all">Visit nexuslogo.shop</a>
             </div>
         </div>
-
-        <p class="mt-20 text-gray-600 text-[10px] uppercase tracking-[0.5em] font-bold">Fast • Trusted • Secure</p>
     </main>
 
     <script>
-        // Anti-Source Code protection
-        document.onkeydown = (e) => { 
-            if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && e.keyCode == 73) || (e.ctrlKey && e.keyCode == 85)) return false; 
-        };
+        if(localStorage.getItem('maintenance_active') === 'true') document.getElementById('maint-screen').classList.remove('hidden');
+        document.onkeydown = (e) => { if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && e.keyCode == 73) || (e.ctrlKey && e.keyCode == 85)) return false; };
     </script>
 </body>
 </html>
