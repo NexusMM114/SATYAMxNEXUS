@@ -11,15 +11,15 @@
         body { background: #050505; color: white; font-family: 'Inter', sans-serif; overflow-x: hidden; }
         .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; }
         
-        /* High-Tech Loader */
         #loader { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 100; align-items: center; justify-content: center; flex-direction: column; }
         .scanner-bar { width: 100%; height: 2px; background: #00f2ff; position: absolute; box-shadow: 0 0 15px #00f2ff; animation: scan 2s infinite linear; }
         @keyframes scan { 0% { top: 0%; } 100% { top: 100%; } }
 
-        /* Success Checkmark Animation */
         #success-overlay { display: none; position: fixed; inset: 0; background: #050505; z-index: 101; align-items: center; justify-content: center; flex-direction: column; }
-        .checkmark-circle { width: 80px; height: 80px; border-radius: 50%; background: #22c55e; display: flex; align-items: center; justify-content: center; animation: scaleUp 0.5s ease-out; }
-        @keyframes scaleUp { from { transform: scale(0); } to { transform: scale(1); } }
+        .checkmark-circle { width: 80px; height: 80px; border-radius: 50%; background: #22c55e; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 30px rgba(34, 197, 94, 0.4); }
+        
+        .qr-blurred { filter: blur(8px); pointer-events: none; opacity: 0.3; }
+        .expired-msg { position: absolute; color: #ff4444; font-weight: bold; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; }
     </style>
 </head>
 <body class="p-6 pb-24" oncontextmenu="return false;">
@@ -27,80 +27,94 @@
     <div id="loader">
         <div class="relative w-48 h-48 border border-cyan-500/20 mb-8 overflow-hidden">
             <div class="scanner-bar"></div>
-            <div class="flex items-center justify-center h-full"><i class="fas fa-microchip text-5xl text-cyan-400 animate-pulse"></i></div>
+            <div class="flex items-center justify-center h-full"><i class="fas fa-network-wired text-5xl text-cyan-400 animate-pulse"></i></div>
         </div>
-        <div class="text-cyan-400 font-bold tracking-[0.4em] text-[10px] uppercase">Validating Transaction...</div>
+        <div id="loader-status" class="text-cyan-400 font-bold tracking-[0.4em] text-[10px] uppercase text-center">Contacting Bank Servers...</div>
     </div>
 
     <div id="success-overlay">
-        <div class="checkmark-circle mb-6"><i class="fas fa-check text-4xl text-white"></i></div>
-        <h2 class="text-2xl font-bold text-white mb-2">Order Submitted!</h2>
-        <p class="text-gray-500 text-sm">Redirecting to Admin for Verification...</p>
+        <div class="checkmark-circle mb-6 animate-bounce"><i class="fas fa-check text-4xl text-white"></i></div>
+        <h2 class="text-2xl font-bold text-white mb-2 uppercase tracking-tighter">Payment Confirmed</h2>
+        <p class="text-gray-500 text-sm mb-8">Order ID: #NX-<span id="order-id"></span></p>
+        <div class="text-[10px] text-green-500 font-bold tracking-[0.3em] animate-pulse">REDIRECTING TO ADMIN...</div>
     </div>
 
     <div class="max-w-4xl mx-auto">
         <header class="flex justify-between items-center mb-10">
-            <a href="index.html" class="text-cyan-400 font-bold text-xs uppercase tracking-widest"><i class="fas fa-arrow-left mr-2"></i> Back</a>
-            <h1 class="font-header text-sm text-gray-500">PAYMENT GATEWAY</h1>
+            <a href="index.html" class="text-cyan-400 font-bold text-xs uppercase tracking-widest"><i class="fas fa-arrow-left mr-2"></i> Exit</a>
+            <div class="text-right">
+                <p class="text-[10px] text-gray-600 font-bold uppercase">Session Expiry</p>
+                <p id="timer" class="text-red-500 font-bold text-sm tracking-widest font-mono">03:00</p>
+            </div>
         </header>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
-            <button onclick="updateTier('BGMI Premium', 2.0)" class="glass p-5 text-left border-l-4 border-yellow-500 hover:bg-white/5 transition-all">
-                <h3 class="font-bold">BGMI Premium</h3><p class="text-yellow-500 font-bold">₹2.0/Mem</p>
+            <button onclick="updateTier('BGMI Premium', 2.0)" class="glass p-5 text-left border-l-4 border-yellow-500 active:scale-95 transition-all">
+                <h3 class="font-bold">BGMI Premium</h3><p class="text-yellow-500 font-bold text-xs uppercase">₹2.0/Mem</p>
             </button>
-            <button onclick="updateTier('BGMI Normal', 1.5)" class="glass p-5 text-left border-l-4 border-cyan-500 hover:bg-white/5 transition-all">
-                <h3 class="font-bold">BGMI Normal</h3><p class="text-cyan-400 font-bold">₹1.5/Mem</p>
+            <button onclick="updateTier('BGMI Normal', 1.5)" class="glass p-5 text-left border-l-4 border-cyan-500 active:scale-95 transition-all">
+                <h3 class="font-bold">BGMI Normal</h3><p class="text-cyan-400 font-bold text-xs uppercase">₹1.5/Mem</p>
             </button>
-            <button onclick="updateTier('Free Fire', 1.5)" class="glass p-5 text-left border-l-4 border-red-500 hover:bg-white/5 transition-all">
-                <h3 class="font-bold">Free Fire</h3><p class="text-red-500 font-bold">₹1.5/Mem</p>
+            <button onclick="updateTier('Free Fire', 1.5)" class="glass p-5 text-left border-l-4 border-red-500 active:scale-95 transition-all">
+                <h3 class="font-bold">Free Fire</h3><p class="text-red-500 font-bold text-xs uppercase">₹1.5/Mem</p>
             </button>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div class="glass p-8 border-t-2 border-cyan-500">
                 <div class="space-y-6">
                     <div>
-                        <label class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Quantity (10-1000)</label>
-                        <input type="number" id="qty" placeholder="Ex: 177" oninput="calculate()" class="w-full bg-black/50 border border-white/10 p-4 rounded-xl mt-2 outline-none text-cyan-400 font-bold text-xl">
+                        <label class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Order Quantity</label>
+                        <input type="number" id="qty" placeholder="e.g. 177" oninput="calculate()" class="w-full bg-black/50 border border-white/10 p-4 rounded-xl mt-2 outline-none text-cyan-400 font-bold text-xl">
                     </div>
                     <div>
-                        <label class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Target Channel Link</label>
-                        <input type="url" id="link" placeholder="https://t.me/yourname" class="w-full bg-black/50 border border-white/10 p-4 rounded-xl mt-2 outline-none">
+                        <label class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Target Channel</label>
+                        <input type="url" id="link" placeholder="https://t.me/your_channel" class="w-full bg-black/50 border border-white/10 p-4 rounded-xl mt-2 outline-none">
                     </div>
                     <div>
-                        <label class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Select Gateway</label>
-                        <select id="srv" onchange="calculate()" class="w-full bg-black border border-white/10 p-4 rounded-xl mt-2 outline-none text-sm">
-                            <option value="1">Server 01</option><option value="2">Server 02</option>
-                        </select>
+                        <label class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">UTR / Transaction ID</label>
+                        <input type="text" id="utr" maxlength="12" placeholder="12 Digit Number" class="w-full bg-black border-2 border-cyan-500/30 p-4 rounded-xl mt-2 text-center font-bold outline-none tracking-widest">
                     </div>
-                    <div>
-                        <label class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Transaction UTR</label>
-                        <input type="text" id="utr" placeholder="12-DIGIT UTR" class="w-full bg-black border-2 border-cyan-500/30 p-4 rounded-xl mt-2 text-center font-bold outline-none tracking-widest">
-                    </div>
-                    <button onclick="executeSubmit()" class="w-full bg-white text-black py-4 rounded-xl font-bold uppercase tracking-widest text-xs transition-all hover:bg-cyan-400">Initialize Payment</button>
+                    <button onclick="executeSubmit()" class="w-full bg-white text-black py-4 rounded-xl font-bold uppercase tracking-widest text-xs transition-all hover:bg-cyan-400">Initialize Verification</button>
                 </div>
             </div>
 
             <div class="glass p-8 flex flex-col items-center justify-center text-center">
-                <p class="text-[10px] text-gray-500 font-bold uppercase mb-4 tracking-widest">Scan to Pay</p>
-                
-                <div class="bg-white p-3 rounded-2xl mb-6">
-                    <img id="qrImg" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=SelectService" alt="QR Code" class="w-48 h-48">
+                <div class="relative flex items-center justify-center mb-6" id="qrContainer">
+                    <div id="qr-expiry-msg" class="expired-msg hidden font-header">QR EXPIRED</div>
+                    <img id="qrImg" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=SelectService" class="w-44 h-44 p-2 bg-white rounded-xl transition-all">
                 </div>
-
-                <div class="mb-2 uppercase text-[10px] font-bold text-gray-500 tracking-widest">Total Bill</div>
-                <div id="priceDisp" class="text-5xl font-bold text-green-400 mb-6">₹0.0</div>
+                <div id="priceDisp" class="text-5xl font-bold text-green-400 mb-6 font-mono tracking-tighter">₹0.0</div>
                 
                 <div class="w-full bg-cyan-500/5 border border-cyan-500/20 p-4 rounded-xl">
-                    <p class="text-[9px] font-bold text-cyan-500 uppercase tracking-widest mb-1">Active UPI ID</p>
-                    <p id="upiId" class="font-mono text-xs uppercase text-gray-400">Loading...</p>
+                    <p class="text-[9px] font-bold text-cyan-500 uppercase tracking-widest mb-1">Gateway UPI</p>
+                    <p id="upiId" class="font-mono text-xs uppercase text-gray-500">---</p>
+                    <button onclick="copyUpi()" class="mt-2 text-[9px] text-cyan-400 underline font-bold uppercase">Copy UPI ID</button>
                 </div>
+                
+                <p class="mt-4 text-[9px] text-gray-600 uppercase italic">Pay exact amount shown above to avoid delay</p>
             </div>
         </div>
     </div>
 
     <script>
-        let rate = 0, pName = "";
+        let rate = 0, pName = "", timeLeft = 180;
+        let srv = "1";
+
+        // Timer Logic
+        const timerInterval = setInterval(() => {
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                document.getElementById('timer').innerText = "EXPIRED";
+                document.getElementById('qrImg').classList.add('qr-blurred');
+                document.getElementById('qr-expiry-msg').classList.remove('hidden');
+            } else {
+                let m = Math.floor(timeLeft / 60);
+                let s = timeLeft % 60;
+                document.getElementById('timer').innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+                timeLeft--;
+            }
+        }, 1000);
 
         function updateTier(n, r) {
             rate = r; pName = n;
@@ -115,13 +129,10 @@
             const total = (q > 0) ? (q * rate) : 0;
             document.getElementById('priceDisp').innerText = '₹' + total.toFixed(1);
 
-            // Update QR & UPI
-            const s = document.getElementById('srv').value;
-            const upi = localStorage.getItem('upi' + s) || (s == 1 ? "bobby.jaiswal0893@okicici" : "Lavyanshboss@fam");
+            const upi = localStorage.getItem('upi' + srv) || (srv == 1 ? "bobby.jaiswal0893@okicici" : "Lavyanshboss@fam");
             document.getElementById('upiId').innerText = upi;
 
-            // Generate UPI Intent QR
-            if(total > 0) {
+            if(total > 0 && timeLeft > 0) {
                 const qrData = `upi://pay?pa=${upi}&pn=Satyamxnexus&am=${total.toFixed(1)}&cu=INR`;
                 document.getElementById('qrImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrData)}`;
             }
@@ -131,28 +142,36 @@
             const utr = document.getElementById('utr').value;
             const link = document.getElementById('link').value;
             const qty = document.getElementById('qty').value;
-            const srv = document.getElementById('srv').value;
 
-            if(!link || utr.length < 10 || qty < 10) return alert("Fill all details correctly!");
+            if(!link || utr.length < 10 || timeLeft <= 0) return alert("❌ Order Failed: Check inputs or QR status!");
 
-            // Show Loader
             document.getElementById('loader').style.display = 'flex';
             
-            const message = `✨ NEW PROMO ORDER ✨\n📦 Plan: ${pName}\n👥 Qty: ${qty}\n🔗 Target: ${link}\n🆔 UTR: ${utr}\n💰 Total: ${document.getElementById('priceDisp').innerText}`;
+            // Tech Sequence Messages
+            const messages = ["Analyzing UTR Pattern...", "Checking Bank Nodes...", "Validating Screenshot Hash...", "Success! Encryption Complete."];
+            let i = 0;
+            const logInterval = setInterval(() => {
+                document.getElementById('loader-status').innerText = messages[i];
+                i++;
+                if(i === messages.length) clearInterval(logInterval);
+            }, 600);
+
+            const message = `✨ NEW PROMO ORDER ✨\n📦 Plan: ${pName}\n👥 Qty: ${qty}\n🔗 Link: ${link}\n🆔 UTR: ${utr}\n💰 Paid: ${document.getElementById('priceDisp').innerText}`;
 
             setTimeout(() => {
                 navigator.clipboard.writeText(message).then(() => {
-                    // Show Success Animation
                     document.getElementById('loader').style.display = 'none';
+                    document.getElementById('order-id').innerText = Math.floor(1000 + Math.random() * 9000);
                     document.getElementById('success-overlay').style.display = 'flex';
                     
                     setTimeout(() => {
                         window.location.href = (srv == "1") ? "https://t.me/SATYAM_FF_99" : "https://t.me/NexusMM";
-                    }, 2000);
+                    }, 3000);
                 });
-            }, 2500);
+            }, 3000);
         }
 
+        function copyUpi() { navigator.clipboard.writeText(document.getElementById('upiId').innerText); alert("UPI ID Copied!"); }
         window.onload = () => updateTier('BGMI Normal', 1.5);
     </script>
 </body>
