@@ -2,79 +2,172 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>ID Fabrication | Nexus Hub</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ID Checkout | Satyamxnexus Hub</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { background: #050505; color: white; font-family: 'Inter', sans-serif; -webkit-user-select: none; user-select: none; }
-        .glass { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; }
-        #loader { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 100; align-items: center; justify-content: center; flex-direction: column; }
-        .circle { width: 60px; height: 60px; border: 4px solid #7c3aed; border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Inter:wght@400;600;700&display=swap');
+        body { background: #050505; color: white; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; }
+        
+        #loader { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 100; align-items: center; justify-content: center; flex-direction: column; }
+        .scanner-bar { width: 100%; height: 2px; background: #7c3aed; position: absolute; box-shadow: 0 0 15px #7c3aed; animation: scan 2s infinite linear; }
+        @keyframes scan { 0% { top: 0%; } 100% { top: 100%; } }
+
+        #success-overlay { display: none; position: fixed; inset: 0; background: #050505; z-index: 101; align-items: center; justify-content: center; flex-direction: column; }
+        .checkmark-circle { width: 80px; height: 80px; border-radius: 50%; background: #22c55e; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 30px rgba(34, 197, 94, 0.4); }
+        
+        .qr-blurred { filter: blur(10px); pointer-events: none; opacity: 0.2; }
+        .expired-msg { position: absolute; color: #ff0000; font-weight: bold; font-size: 14px; text-transform: uppercase; letter-spacing: 2px; font-family: 'Syncopate'; }
     </style>
 </head>
-<body class="p-6" oncontextmenu="return false;">
-    <div id="loader"><div class="circle mb-6"></div><div class="text-purple-500 font-bold text-xs tracking-widest">Encrypting ID Profile...</div></div>
-    
-    <div class="max-w-5xl mx-auto">
-        <a href="index.html" class="text-purple-400 text-xs font-bold uppercase mb-12 inline-block"><i class="fas fa-arrow-left mr-2"></i> Back</a>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
-            <div class="glass p-8 border-l-4 border-purple-500">
-                <h3 class="text-2xl font-bold uppercase mb-2">Basic Architect</h3>
-                <p class="text-3xl font-bold mb-6">₹300</p>
-                <ul class="text-sm space-y-3 text-gray-500 mb-8">
-                    <li><i class="fas fa-check text-purple-500 mr-2"></i> Logo Name 🥂 & Bio ❤️</li>
-                    <li><i class="fas fa-check text-purple-500 mr-2"></i> Full Set & Abouts ✅</li>
-                    <li><i class="fas fa-check text-purple-500 mr-2"></i> 50+ Reqs Channel 👑</li>
-                    <li><i class="fas fa-check text-purple-500 mr-2"></i> 200 DMs 🧃</li>
-                </ul>
-                <button onclick="openCheck('Basic Architect', 300)" class="w-full bg-purple-600 py-3 rounded-xl font-bold uppercase text-xs">Build ID</button>
+<body class="p-6 pb-24" oncontextmenu="return false;">
+
+    <div id="loader">
+        <div class="relative w-48 h-48 border border-purple-500/20 mb-8 overflow-hidden">
+            <div class="scanner-bar"></div>
+            <div class="flex items-center justify-center h-full"><i class="fas fa-fingerprint text-5xl text-purple-500 animate-pulse"></i></div>
+        </div>
+        <div id="loader-status" class="text-purple-400 font-bold tracking-[0.4em] text-[10px] uppercase text-center">Verifying UTR Hash...</div>
+    </div>
+
+    <div id="success-overlay">
+        <div class="checkmark-circle mb-6 animate-bounce"><i class="fas fa-check text-4xl text-white"></i></div>
+        <h2 class="text-2xl font-bold text-white mb-2 uppercase tracking-tighter">Profile Reserved</h2>
+        <p class="text-gray-500 text-sm mb-8">Transaction: #ID-<span id="order-id"></span></p>
+        <div class="text-[10px] text-green-500 font-bold tracking-[0.3em] animate-pulse uppercase">Syncing with Admin Terminal...</div>
+    </div>
+
+    <div class="max-w-4xl mx-auto">
+        <header class="flex justify-between items-center mb-10">
+            <a href="index.html" class="text-purple-400 font-bold text-xs uppercase tracking-widest"><i class="fas fa-arrow-left mr-2"></i> Cancel</a>
+            <div class="text-right">
+                <p class="text-[10px] text-gray-600 font-bold uppercase">Payment Window</p>
+                <p id="timer" class="text-red-500 font-bold text-sm tracking-widest font-mono">03:00</p>
             </div>
-            <div class="glass p-8 border-l-4 border-blue-500">
-                <h3 class="text-2xl font-bold uppercase mb-2">Ultimate Setup</h3>
-                <p class="text-3xl font-bold mb-6 text-blue-400">₹700</p>
-                <ul class="text-sm space-y-3 text-gray-300 mb-8">
-                    <li><i class="fas fa-gem text-blue-500 mr-2"></i> <b>Telegram Premium Included</b> 💎</li>
-                    <li><i class="fas fa-check text-blue-500 mr-2"></i> Custom Username Selection 💐</li>
-                    <li><i class="fas fa-check text-blue-500 mr-2"></i> 100+ Reqs Channel 👑</li>
-                    <li><i class="fas fa-check text-blue-500 mr-2"></i> 400 DMs & Admin Support</li>
-                </ul>
-                <button onclick="openCheck('Ultimate Setup', 700)" class="w-full bg-blue-600 py-3 rounded-xl font-bold uppercase text-xs">Build Elite ID</button>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+            <div onclick="selectPlan('Basic Architect', 300)" class="glass p-6 border-l-4 border-purple-500 cursor-pointer hover:bg-purple-500/5 transition-all">
+                <h3 class="font-bold text-white uppercase">Basic Architect</h3>
+                <p class="text-purple-400 font-bold text-xl">₹300</p>
+            </div>
+            <div onclick="selectPlan('Ultimate Setup', 700)" class="glass p-6 border-l-4 border-blue-500 cursor-pointer hover:bg-blue-500/5 transition-all">
+                <h3 class="font-bold text-white uppercase">Ultimate Setup</h3>
+                <p class="text-blue-400 font-bold text-xl">₹700</p>
             </div>
         </div>
 
-        <div id="checkArea" class="glass p-8 max-w-xl mx-auto border-t-2 border-purple-500 hidden">
-            <h3 id="planDisp" class="text-xl font-bold text-purple-400 mb-6 uppercase"></h3>
-            <div class="space-y-4">
-                <input type="text" id="user" placeholder="Your Telegram @Username" class="w-full bg-black p-4 rounded-xl border border-white/10 outline-none">
-                <select id="srv" onchange="syncUpi()" class="w-full bg-black p-4 rounded-xl border border-white/10 outline-none"><option value="1">Server 01</option><option value="2">Server 02</option></select>
-                <div id="upiDisp" class="bg-purple-500/5 p-4 rounded-xl font-mono text-xs text-center">Loading...</div>
-                <input type="text" id="utr" placeholder="12-DIGIT UTR" class="w-full bg-black border-2 border-purple-500/30 p-4 rounded-xl text-center font-bold outline-none">
-                <button onclick="submitID()" class="w-full bg-white text-black py-4 rounded-xl font-bold uppercase tracking-widest text-xs">Submit & Redirect</button>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="glass p-8 border-t-2 border-purple-500">
+                <div class="space-y-6">
+                    <div>
+                        <label class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Telegram Username</label>
+                        <input type="text" id="tgUser" placeholder="@your_id" class="w-full bg-black/50 border border-white/10 p-4 rounded-xl mt-2 outline-none text-purple-400 font-bold">
+                    </div>
+                    <div>
+                        <label class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Selected Gateway</label>
+                        <select id="srv" onchange="calculate()" class="w-full bg-black border border-white/10 p-4 rounded-xl mt-2 outline-none text-sm">
+                            <option value="1">Server 01 (Secure)</option>
+                            <option value="2">Server 02 (Secure)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Payment UTR</label>
+                        <input type="text" id="utr" maxlength="12" placeholder="12 Digit ID" class="w-full bg-black border-2 border-purple-500/30 p-4 rounded-xl mt-2 text-center font-bold outline-none tracking-widest">
+                    </div>
+                    <button onclick="finalizeOrder()" class="w-full bg-white text-black py-4 rounded-xl font-bold uppercase tracking-widest text-xs transition-all hover:bg-purple-500">Initialize ID Fabrication</button>
+                </div>
+            </div>
+
+            <div class="glass p-8 flex flex-col items-center justify-center text-center">
+                <div class="relative flex items-center justify-center mb-6">
+                    <div id="qr-expiry-msg" class="expired-msg hidden">EXPIRED</div>
+                    <img id="qrImg" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=SelectPlan" class="w-44 h-44 p-2 bg-white rounded-xl transition-all">
+                </div>
+                <div id="priceDisp" class="text-5xl font-bold text-green-400 mb-6 font-mono tracking-tighter">₹0</div>
+                
+                <div class="w-full bg-purple-500/5 border border-purple-500/20 p-4 rounded-xl">
+                    <p class="text-[9px] font-bold text-purple-500 uppercase tracking-widest mb-1">UPI Address</p>
+                    <p id="upiId" class="font-mono text-xs uppercase text-gray-500">---</p>
+                </div>
+                <p class="mt-4 text-[9px] text-gray-600 uppercase italic">Scan with GPay, PhonePe, or Paytm</p>
             </div>
         </div>
     </div>
 
     <script>
-        let curPlan = "", curPrice = "";
-        function openCheck(n, p) { curPlan = n; curPrice = p; document.getElementById('checkArea').classList.remove('hidden'); document.getElementById('planDisp').innerText = n; syncUpi(); }
-        function syncUpi() {
-            const s = document.getElementById('srv').value;
-            document.getElementById('upiDisp').innerText = localStorage.getItem('upi'+s) || (s==1?"bobby.jaiswal0893@okicici":"Lavyanshboss@fam");
+        let pPrice = 0, pName = "", timeLeft = 180;
+
+        // Timer Logic
+        const timerInterval = setInterval(() => {
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                document.getElementById('timer').innerText = "SESSION EXPIRED";
+                document.getElementById('qrImg').classList.add('qr-blurred');
+                document.getElementById('qr-expiry-msg').classList.remove('hidden');
+            } else {
+                let m = Math.floor(timeLeft / 60);
+                let s = timeLeft % 60;
+                document.getElementById('timer').innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+                timeLeft--;
+            }
+        }, 1000);
+
+        function selectPlan(n, p) {
+            pName = n; pPrice = p;
+            calculate();
         }
-        function submitID() {
-            const u = document.getElementById('user').value, ut = document.getElementById('utr').value, s = document.getElementById('srv').value;
-            if(!u || ut.length < 10) return alert("Fill all details!");
+
+        function calculate() {
+            document.getElementById('priceDisp').innerText = '₹' + pPrice;
+            const s = document.getElementById('srv').value;
+            const upi = localStorage.getItem('upi' + s) || (s == 1 ? "bobby.jaiswal0893@okicici" : "Lavyanshboss@fam");
+            document.getElementById('upiId').innerText = upi;
+
+            if(pPrice > 0 && timeLeft > 0) {
+                const qrData = `upi://pay?pa=${upi}&pn=Satyamxnexus&am=${pPrice}&cu=INR`;
+                document.getElementById('qrImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrData)}`;
+            }
+        }
+
+        function finalizeOrder() {
+            const user = document.getElementById('tgUser').value;
+            const utr = document.getElementById('utr').value;
+            const s = document.getElementById('srv').value;
+
+            if(!user || utr.length < 10 || timeLeft <= 0 || pPrice === 0) {
+                return alert("❌ Check Plan, Username, UTR or Timer!");
+            }
+
             document.getElementById('loader').style.display = 'flex';
-            const msg = `💎 NEW ID ORDER 💎\n🛡️ Plan: ${curPlan}\n👤 User: ${u}\n🆔 UTR: ${ut}\n💰 Paid: ₹${curPrice}`;
+            
+            // Tech Sequence
+            const steps = ["Hashing Transaction...", "Verifying Node...", "Screenshot Block Verified...", "Order Finalized!"];
+            let idx = 0;
+            const logInterval = setInterval(() => {
+                document.getElementById('loader-status').innerText = steps[idx];
+                idx++;
+                if(idx === steps.length) clearInterval(logInterval);
+            }, 700);
+
+            const msg = `💎 NEW ID ORDER 💎\n🛡️ Plan: ${pName}\n👤 User: ${user}\n🆔 UTR: ${utr}\n💰 Amount: ₹${pPrice}`;
+
             setTimeout(() => {
                 navigator.clipboard.writeText(msg).then(() => {
-                    window.location.href = (s == "1") ? "https://t.me/SATYAM_FF_99" : "https://t.me/NexusMM";
+                    document.getElementById('loader').style.display = 'none';
+                    document.getElementById('order-id').innerText = Math.floor(1000 + Math.random() * 9000);
+                    document.getElementById('success-overlay').style.display = 'flex';
+                    
+                    setTimeout(() => {
+                        window.location.href = (s == "1") ? "https://t.me/SATYAM_FF_99" : "https://t.me/NexusMM";
+                    }, 3000);
                 });
-            }, 3000);
+            }, 3500);
         }
-        document.onkeydown = (e) => { if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && e.keyCode == 73) || (e.ctrlKey && e.keyCode == 85)) return false; };
+
+        window.onload = () => selectPlan('Basic Architect', 300);
     </script>
 </body>
 </html>
