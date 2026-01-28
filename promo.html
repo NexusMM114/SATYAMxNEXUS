@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checkout | Satyamxnexus Hub</title>
+    <title>Promo Terminal | Nexus Hub</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -19,7 +19,7 @@
         .checkmark-circle { width: 80px; height: 80px; border-radius: 50%; background: #22c55e; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 30px rgba(34, 197, 94, 0.4); }
         
         .qr-blurred { filter: blur(8px); pointer-events: none; opacity: 0.3; }
-        .expired-msg { position: absolute; color: #ff4444; font-weight: bold; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; }
+        .offline-overlay { position: absolute; background: rgba(0,0,0,0.7); inset: 0; display: flex; align-items: center; justify-content: center; border-radius: 24px; z-index: 10; }
     </style>
 </head>
 <body class="p-6 pb-24" oncontextmenu="return false;">
@@ -60,7 +60,16 @@
             </button>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 relative">
+            
+            <div id="offline-msg" class="offline-overlay hidden">
+                <div class="text-center">
+                    <i class="fas fa-plug text-4xl text-red-500 mb-4 animate-bounce"></i>
+                    <h3 class="font-header text-white text-lg uppercase">Server Offline</h3>
+                    <p class="text-gray-400 text-xs mt-2 uppercase">Check back later or try another server.</p>
+                </div>
+            </div>
+
             <div class="glass p-8 border-t-2 border-cyan-500">
                 <div class="space-y-6">
                     <div>
@@ -72,6 +81,13 @@
                         <input type="url" id="link" placeholder="https://t.me/your_channel" class="w-full bg-black/50 border border-white/10 p-4 rounded-xl mt-2 outline-none">
                     </div>
                     <div>
+                        <label class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Select Payment Server</label>
+                        <select id="srv" onchange="calculate()" class="w-full bg-black border border-white/10 p-4 rounded-xl mt-2 outline-none text-sm">
+                            <option value="1">Server 01</option>
+                            <option value="2">Server 02</option>
+                        </select>
+                    </div>
+                    <div>
                         <label class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">UTR / Transaction ID</label>
                         <input type="text" id="utr" maxlength="12" placeholder="12 Digit Number" class="w-full bg-black border-2 border-cyan-500/30 p-4 rounded-xl mt-2 text-center font-bold outline-none tracking-widest">
                     </div>
@@ -80,48 +96,43 @@
             </div>
 
             <div class="glass p-8 flex flex-col items-center justify-center text-center">
-                <div class="relative flex items-center justify-center mb-6" id="qrContainer">
-                    <div id="qr-expiry-msg" class="expired-msg hidden font-header">QR EXPIRED</div>
-                    <img id="qrImg" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=SelectService" class="w-44 h-44 p-2 bg-white rounded-xl transition-all">
+                <div class="relative flex items-center justify-center mb-6">
+                    <img id="qrImg" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=SelectService" class="w-44 h-44 p-2 bg-white rounded-xl">
                 </div>
                 <div id="priceDisp" class="text-5xl font-bold text-green-400 mb-6 font-mono tracking-tighter">₹0.0</div>
                 
                 <div class="w-full bg-cyan-500/5 border border-cyan-500/20 p-4 rounded-xl">
                     <p class="text-[9px] font-bold text-cyan-500 uppercase tracking-widest mb-1">Gateway UPI</p>
-                    <p id="upiId" class="font-mono text-xs uppercase text-gray-500">---</p>
-                    <button onclick="copyUpi()" class="mt-2 text-[9px] text-cyan-400 underline font-bold uppercase">Copy UPI ID</button>
+                    <p id="upiId" class="font-mono text-xs uppercase text-gray-400 tracking-tighter">---</p>
                 </div>
-                
-                <p class="mt-4 text-[9px] text-gray-600 uppercase italic">Pay exact amount shown above to avoid delay</p>
             </div>
         </div>
     </div>
 
     <script>
         let rate = 0, pName = "", timeLeft = 180;
-        let srv = "1";
 
-        // Timer Logic
-        const timerInterval = setInterval(() => {
-            if (timeLeft <= 0) {
-                clearInterval(timerInterval);
-                document.getElementById('timer').innerText = "EXPIRED";
-                document.getElementById('qrImg').classList.add('qr-blurred');
-                document.getElementById('qr-expiry-msg').classList.remove('hidden');
+        function syncWithAdmin() {
+            const currentServer = document.getElementById('srv').value;
+            const isSrv1Active = localStorage.getItem('srv1_active') !== 'false';
+            const isSrv2Active = localStorage.getItem('srv2_active') !== 'false';
+            
+            const overlay = document.getElementById('offline-msg');
+
+            // Logic to show/hide based on Admin.html toggles
+            if ((currentServer === "1" && !isSrv1Active) || (currentServer === "2" && !isSrv2Active)) {
+                overlay.classList.remove('hidden');
             } else {
-                let m = Math.floor(timeLeft / 60);
-                let s = timeLeft % 60;
-                document.getElementById('timer').innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-                timeLeft--;
+                overlay.classList.add('hidden');
             }
-        }, 1000);
 
-        function updateTier(n, r) {
-            rate = r; pName = n;
-            calculate();
+            const upi = localStorage.getItem('upi' + currentServer) || (currentServer == 1 ? "bobby.jaiswal0893@okicici" : "Lavyanshboss@fam");
+            document.getElementById('upiId').innerText = upi;
+            return upi;
         }
 
         function calculate() {
+            const upi = syncWithAdmin();
             let qInput = document.getElementById('qty');
             let q = parseInt(qInput.value);
             if(q > 1000) { qInput.value = 1000; q = 1000; }
@@ -129,33 +140,36 @@
             const total = (q > 0) ? (q * rate) : 0;
             document.getElementById('priceDisp').innerText = '₹' + total.toFixed(1);
 
-            const upi = localStorage.getItem('upi' + srv) || (srv == 1 ? "bobby.jaiswal0893@okicici" : "Lavyanshboss@fam");
-            document.getElementById('upiId').innerText = upi;
-
-            if(total > 0 && timeLeft > 0) {
+            if(total > 0) {
                 const qrData = `upi://pay?pa=${upi}&pn=Satyamxnexus&am=${total.toFixed(1)}&cu=INR`;
                 document.getElementById('qrImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrData)}`;
             }
         }
 
+        // Rest of your logic (Timer, ExecuteSubmit, etc.) remains the same
+        function updateTier(n, r) { rate = r; pName = n; calculate(); }
+
+        const timerInterval = setInterval(() => {
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                document.getElementById('timer').innerText = "EXPIRED";
+                document.getElementById('qrImg').classList.add('qr-blurred');
+            } else {
+                let m = Math.floor(timeLeft / 60); let s = timeLeft % 60;
+                document.getElementById('timer').innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+                timeLeft--;
+            }
+        }, 1000);
+
         function executeSubmit() {
             const utr = document.getElementById('utr').value;
             const link = document.getElementById('link').value;
             const qty = document.getElementById('qty').value;
+            const srv = document.getElementById('srv').value;
 
-            if(!link || utr.length < 10 || timeLeft <= 0) return alert("❌ Order Failed: Check inputs or QR status!");
+            if(!link || utr.length < 10) return alert("Fill all details correctly!");
 
             document.getElementById('loader').style.display = 'flex';
-            
-            // Tech Sequence Messages
-            const messages = ["Analyzing UTR Pattern...", "Checking Bank Nodes...", "Validating Screenshot Hash...", "Success! Encryption Complete."];
-            let i = 0;
-            const logInterval = setInterval(() => {
-                document.getElementById('loader-status').innerText = messages[i];
-                i++;
-                if(i === messages.length) clearInterval(logInterval);
-            }, 600);
-
             const message = `✨ NEW PROMO ORDER ✨\n📦 Plan: ${pName}\n👥 Qty: ${qty}\n🔗 Link: ${link}\n🆔 UTR: ${utr}\n💰 Paid: ${document.getElementById('priceDisp').innerText}`;
 
             setTimeout(() => {
@@ -163,16 +177,14 @@
                     document.getElementById('loader').style.display = 'none';
                     document.getElementById('order-id').innerText = Math.floor(1000 + Math.random() * 9000);
                     document.getElementById('success-overlay').style.display = 'flex';
-                    
                     setTimeout(() => {
                         window.location.href = (srv == "1") ? "https://t.me/SATYAM_FF_99" : "https://t.me/NexusMM";
-                    }, 3000);
+                    }, 2500);
                 });
             }, 3000);
         }
 
-        function copyUpi() { navigator.clipboard.writeText(document.getElementById('upiId').innerText); alert("UPI ID Copied!"); }
-        window.onload = () => updateTier('BGMI Normal', 1.5);
+        window.onload = () => { updateTier('BGMI Normal', 1.5); syncWithAdmin(); };
     </script>
 </body>
 </html>
