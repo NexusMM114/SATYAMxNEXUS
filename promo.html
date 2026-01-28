@@ -3,188 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Promo Terminal | Nexus Hub</title>
+    <title>Checkout | Nexus Hub</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Inter:wght@400;600;700&display=swap');
         body { background: #050505; color: white; font-family: 'Inter', sans-serif; overflow-x: hidden; }
         .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; }
-        
         #loader { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 100; align-items: center; justify-content: center; flex-direction: column; }
-        .scanner-bar { width: 100%; height: 2px; background: #00f2ff; position: absolute; box-shadow: 0 0 15px #00f2ff; animation: scan 2s infinite linear; }
+        .scanner-bar { width: 100%; height: 2px; background: #00f2ff; position: absolute; animation: scan 2s infinite linear; }
         @keyframes scan { 0% { top: 0%; } 100% { top: 100%; } }
-
         #success-overlay { display: none; position: fixed; inset: 0; background: #050505; z-index: 101; align-items: center; justify-content: center; flex-direction: column; }
-        .checkmark-circle { width: 80px; height: 80px; border-radius: 50%; background: #22c55e; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 30px rgba(34, 197, 94, 0.4); }
-        
         .qr-blurred { filter: blur(8px); pointer-events: none; opacity: 0.3; }
-        .offline-overlay { position: absolute; background: rgba(0,0,0,0.7); inset: 0; display: flex; align-items: center; justify-content: center; border-radius: 24px; z-index: 10; }
+        .offline-overlay { position: absolute; background: rgba(0,0,0,0.85); inset: 0; z-index: 20; display: flex; align-items: center; justify-content: center; border-radius: 24px; border: 1px solid #ff4444; }
     </style>
 </head>
 <body class="p-6 pb-24" oncontextmenu="return false;">
-
-    <div id="loader">
-        <div class="relative w-48 h-48 border border-cyan-500/20 mb-8 overflow-hidden">
-            <div class="scanner-bar"></div>
-            <div class="flex items-center justify-center h-full"><i class="fas fa-network-wired text-5xl text-cyan-400 animate-pulse"></i></div>
-        </div>
-        <div id="loader-status" class="text-cyan-400 font-bold tracking-[0.4em] text-[10px] uppercase text-center">Contacting Bank Servers...</div>
+    <div id="maint-screen" class="fixed inset-0 bg-black z-[9999] hidden flex-col items-center justify-center text-center p-6">
+        <i class="fas fa-tools text-6xl text-yellow-500 animate-bounce mb-6"></i>
+        <h2 class="text-xl font-bold">SYSTEM OFFLINE</h2>
     </div>
 
-    <div id="success-overlay">
-        <div class="checkmark-circle mb-6 animate-bounce"><i class="fas fa-check text-4xl text-white"></i></div>
-        <h2 class="text-2xl font-bold text-white mb-2 uppercase tracking-tighter">Payment Confirmed</h2>
-        <p class="text-gray-500 text-sm mb-8">Order ID: #NX-<span id="order-id"></span></p>
-        <div class="text-[10px] text-green-500 font-bold tracking-[0.3em] animate-pulse">REDIRECTING TO ADMIN...</div>
-    </div>
+    <div id="loader"><div class="relative w-48 h-48 border border-cyan-500/20 mb-8 overflow-hidden"><div class="scanner-bar"></div><i class="fas fa-microchip text-4xl text-cyan-400 absolute inset-0 flex items-center justify-center"></i></div><div id="l-stat" class="text-cyan-400 text-[10px] font-bold tracking-widest">VERIFYING UTR...</div></div>
+    <div id="success-overlay"><div class="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center animate-bounce mb-6"><i class="fas fa-check text-4xl text-white"></i></div><h2 class="text-2xl font-bold uppercase">Payment Successful</h2><p class="text-gray-500 text-sm mt-2">Redirecting to Admin...</p></div>
 
     <div class="max-w-4xl mx-auto">
         <header class="flex justify-between items-center mb-10">
-            <a href="index.html" class="text-cyan-400 font-bold text-xs uppercase tracking-widest"><i class="fas fa-arrow-left mr-2"></i> Exit</a>
-            <div class="text-right">
-                <p class="text-[10px] text-gray-600 font-bold uppercase">Session Expiry</p>
-                <p id="timer" class="text-red-500 font-bold text-sm tracking-widest font-mono">03:00</p>
-            </div>
+            <a href="index.html" class="text-cyan-400 font-bold text-xs uppercase"><i class="fas fa-arrow-left mr-2"></i> Exit</a>
+            <div class="text-right"><p class="text-[9px] text-gray-500 font-bold uppercase">Expires In</p><p id="timer" class="text-red-500 font-bold font-mono">03:00</p></div>
         </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
-            <button onclick="updateTier('BGMI Premium', 2.0)" class="glass p-5 text-left border-l-4 border-yellow-500 active:scale-95 transition-all">
-                <h3 class="font-bold">BGMI Premium</h3><p class="text-yellow-500 font-bold text-xs uppercase">₹2.0/Mem</p>
-            </button>
-            <button onclick="updateTier('BGMI Normal', 1.5)" class="glass p-5 text-left border-l-4 border-cyan-500 active:scale-95 transition-all">
-                <h3 class="font-bold">BGMI Normal</h3><p class="text-cyan-400 font-bold text-xs uppercase">₹1.5/Mem</p>
-            </button>
-            <button onclick="updateTier('Free Fire', 1.5)" class="glass p-5 text-left border-l-4 border-red-500 active:scale-95 transition-all">
-                <h3 class="font-bold">Free Fire</h3><p class="text-red-500 font-bold text-xs uppercase">₹1.5/Mem</p>
-            </button>
-        </div>
-
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 relative">
+            <div id="offline-msg" class="offline-overlay hidden text-center"><h3 class="text-red-500 font-bold uppercase tracking-widest">Server Offline</h3></div>
             
-            <div id="offline-msg" class="offline-overlay hidden">
-                <div class="text-center">
-                    <i class="fas fa-plug text-4xl text-red-500 mb-4 animate-bounce"></i>
-                    <h3 class="font-header text-white text-lg uppercase">Server Offline</h3>
-                    <p class="text-gray-400 text-xs mt-2 uppercase">Check back later or try another server.</p>
-                </div>
-            </div>
-
-            <div class="glass p-8 border-t-2 border-cyan-500">
-                <div class="space-y-6">
-                    <div>
-                        <label class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Order Quantity</label>
-                        <input type="number" id="qty" placeholder="e.g. 177" oninput="calculate()" class="w-full bg-black/50 border border-white/10 p-4 rounded-xl mt-2 outline-none text-cyan-400 font-bold text-xl">
-                    </div>
-                    <div>
-                        <label class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Target Channel</label>
-                        <input type="url" id="link" placeholder="https://t.me/your_channel" class="w-full bg-black/50 border border-white/10 p-4 rounded-xl mt-2 outline-none">
-                    </div>
-                    <div>
-                        <label class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Select Payment Server</label>
-                        <select id="srv" onchange="calculate()" class="w-full bg-black border border-white/10 p-4 rounded-xl mt-2 outline-none text-sm">
-                            <option value="1">Server 01</option>
-                            <option value="2">Server 02</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">UTR / Transaction ID</label>
-                        <input type="text" id="utr" maxlength="12" placeholder="12 Digit Number" class="w-full bg-black border-2 border-cyan-500/30 p-4 rounded-xl mt-2 text-center font-bold outline-none tracking-widest">
-                    </div>
-                    <button onclick="executeSubmit()" class="w-full bg-white text-black py-4 rounded-xl font-bold uppercase tracking-widest text-xs transition-all hover:bg-cyan-400">Initialize Verification</button>
-                </div>
+            <div class="glass p-8 space-y-6">
+                <input type="number" id="qty" placeholder="Custom Quantity (e.g. 177)" oninput="calc()" class="w-full bg-black p-4 rounded-xl border border-white/10 outline-none text-cyan-400 font-bold">
+                <input type="url" id="link" placeholder="Channel Link" class="w-full bg-black p-4 rounded-xl border border-white/10 outline-none">
+                <select id="srv" onchange="calc()" class="w-full bg-black border border-white/10 p-4 rounded-xl outline-none"><option value="1">Server 01</option><option value="2">Server 02</option></select>
+                <input type="text" id="utr" placeholder="12-DIGIT UTR" maxlength="12" class="w-full bg-black border-2 border-cyan-500/30 p-4 rounded-xl text-center font-bold outline-none tracking-widest">
+                <button onclick="submit()" class="w-full bg-white text-black py-4 rounded-xl font-bold uppercase tracking-widest text-xs">Submit Payment</button>
             </div>
 
             <div class="glass p-8 flex flex-col items-center justify-center text-center">
-                <div class="relative flex items-center justify-center mb-6">
-                    <img id="qrImg" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=SelectService" class="w-44 h-44 p-2 bg-white rounded-xl">
-                </div>
-                <div id="priceDisp" class="text-5xl font-bold text-green-400 mb-6 font-mono tracking-tighter">₹0.0</div>
-                
-                <div class="w-full bg-cyan-500/5 border border-cyan-500/20 p-4 rounded-xl">
-                    <p class="text-[9px] font-bold text-cyan-500 uppercase tracking-widest mb-1">Gateway UPI</p>
-                    <p id="upiId" class="font-mono text-xs uppercase text-gray-400 tracking-tighter">---</p>
-                </div>
+                <img id="qrImg" src="" class="w-44 h-44 p-2 bg-white rounded-xl mb-4">
+                <div id="price" class="text-5xl font-bold text-green-400 mb-6">₹0.0</div>
+                <div class="bg-cyan-500/5 p-4 rounded-xl w-full font-mono text-xs text-cyan-400" id="upiDisp">---</div>
             </div>
         </div>
     </div>
 
     <script>
-        let rate = 0, pName = "", timeLeft = 180;
+        let rate = 1.5, timeLeft = 180;
+        function calc() {
+            const currentSrv = document.getElementById('srv').value;
+            const isMaint = localStorage.getItem('maintenance_active') === 'true';
+            if(isMaint) document.getElementById('maint-screen').classList.remove('hidden');
 
-        function syncWithAdmin() {
-            const currentServer = document.getElementById('srv').value;
-            const isSrv1Active = localStorage.getItem('srv1_active') !== 'false';
-            const isSrv2Active = localStorage.getItem('srv2_active') !== 'false';
-            
-            const overlay = document.getElementById('offline-msg');
+            const isOff = localStorage.getItem(`srv${currentSrv}_active`) === 'false';
+            document.getElementById('offline-msg').classList.toggle('hidden', !isOff);
 
-            // Logic to show/hide based on Admin.html toggles
-            if ((currentServer === "1" && !isSrv1Active) || (currentServer === "2" && !isSrv2Active)) {
-                overlay.classList.remove('hidden');
-            } else {
-                overlay.classList.add('hidden');
-            }
+            let q = parseInt(document.getElementById('qty').value) || 0;
+            if(q > 1000) q = 1000;
+            const total = q * rate;
+            document.getElementById('price').innerText = '₹' + total.toFixed(1);
 
-            const upi = localStorage.getItem('upi' + currentServer) || (currentServer == 1 ? "bobby.jaiswal0893@okicici" : "Lavyanshboss@fam");
-            document.getElementById('upiId').innerText = upi;
-            return upi;
+            const upi = localStorage.getItem('upi'+currentSrv) || (currentSrv == 1 ? "bobby.jaiswal0893@okicici" : "Lavyanshboss@fam");
+            document.getElementById('upiDisp').innerText = upi;
+            if(total > 0 && timeLeft > 0) document.getElementById('qrImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`upi://pay?pa=${upi}&am=${total.toFixed(1)}&cu=INR`)}`;
         }
-
-        function calculate() {
-            const upi = syncWithAdmin();
-            let qInput = document.getElementById('qty');
-            let q = parseInt(qInput.value);
-            if(q > 1000) { qInput.value = 1000; q = 1000; }
-            
-            const total = (q > 0) ? (q * rate) : 0;
-            document.getElementById('priceDisp').innerText = '₹' + total.toFixed(1);
-
-            if(total > 0) {
-                const qrData = `upi://pay?pa=${upi}&pn=Satyamxnexus&am=${total.toFixed(1)}&cu=INR`;
-                document.getElementById('qrImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrData)}`;
-            }
-        }
-
-        // Rest of your logic (Timer, ExecuteSubmit, etc.) remains the same
-        function updateTier(n, r) { rate = r; pName = n; calculate(); }
-
-        const timerInterval = setInterval(() => {
-            if (timeLeft <= 0) {
-                clearInterval(timerInterval);
-                document.getElementById('timer').innerText = "EXPIRED";
-                document.getElementById('qrImg').classList.add('qr-blurred');
-            } else {
-                let m = Math.floor(timeLeft / 60); let s = timeLeft % 60;
-                document.getElementById('timer').innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-                timeLeft--;
-            }
-        }, 1000);
-
-        function executeSubmit() {
-            const utr = document.getElementById('utr').value;
-            const link = document.getElementById('link').value;
-            const qty = document.getElementById('qty').value;
-            const srv = document.getElementById('srv').value;
-
-            if(!link || utr.length < 10) return alert("Fill all details correctly!");
-
+        setInterval(() => { if(timeLeft > 0) { timeLeft--; let m = Math.floor(timeLeft/60), s = timeLeft%60; document.getElementById('timer').innerText = `${m}:${s.toString().padStart(2,'0')}`; } else { document.getElementById('qrImg').classList.add('qr-blurred'); } }, 1000);
+        function submit() {
+            if(document.getElementById('utr').value.length < 12) return alert("Enter valid 12-digit UTR!");
             document.getElementById('loader').style.display = 'flex';
-            const message = `✨ NEW PROMO ORDER ✨\n📦 Plan: ${pName}\n👥 Qty: ${qty}\n🔗 Link: ${link}\n🆔 UTR: ${utr}\n💰 Paid: ${document.getElementById('priceDisp').innerText}`;
-
             setTimeout(() => {
-                navigator.clipboard.writeText(message).then(() => {
-                    document.getElementById('loader').style.display = 'none';
-                    document.getElementById('order-id').innerText = Math.floor(1000 + Math.random() * 9000);
-                    document.getElementById('success-overlay').style.display = 'flex';
-                    setTimeout(() => {
-                        window.location.href = (srv == "1") ? "https://t.me/SATYAM_FF_99" : "https://t.me/NexusMM";
-                    }, 2500);
-                });
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('success-overlay').style.display = 'flex';
+                setTimeout(() => { window.location.href = document.getElementById('srv').value == 1 ? "https://t.me/SATYAM_FF_99" : "https://t.me/NexusMM"; }, 2500);
             }, 3000);
         }
-
-        window.onload = () => { updateTier('BGMI Normal', 1.5); syncWithAdmin(); };
+        window.onload = calc;
     </script>
 </body>
 </html>
