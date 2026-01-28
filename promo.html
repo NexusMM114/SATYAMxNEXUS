@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checkout | Nexus Hub</title>
+    <title>Checkout | Satyamxnexus Hub</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -11,77 +11,155 @@
         body { background: #050505; color: white; font-family: 'Inter', sans-serif; overflow-x: hidden; }
         .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; }
         #loader { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 100; align-items: center; justify-content: center; flex-direction: column; }
-        .scanner-bar { width: 100%; height: 2px; background: #00f2ff; position: absolute; animation: scan 2s infinite linear; }
+        .scanner-bar { width: 100%; height: 2px; background: #00f2ff; position: absolute; box-shadow: 0 0 15px #00f2ff; animation: scan 2s infinite linear; }
         @keyframes scan { 0% { top: 0%; } 100% { top: 100%; } }
         #success-overlay { display: none; position: fixed; inset: 0; background: #050505; z-index: 101; align-items: center; justify-content: center; flex-direction: column; }
         .qr-blurred { filter: blur(8px); pointer-events: none; opacity: 0.3; }
-        .offline-overlay { position: absolute; background: rgba(0,0,0,0.85); inset: 0; z-index: 20; display: flex; align-items: center; justify-content: center; border-radius: 24px; border: 1px solid #ff4444; }
     </style>
 </head>
 <body class="p-6 pb-24" oncontextmenu="return false;">
-    <div id="maint-screen" class="fixed inset-0 bg-black z-[9999] hidden flex-col items-center justify-center text-center p-6">
-        <i class="fas fa-tools text-6xl text-yellow-500 animate-bounce mb-6"></i>
-        <h2 class="text-xl font-bold">SYSTEM OFFLINE</h2>
-    </div>
 
-    <div id="loader"><div class="relative w-48 h-48 border border-cyan-500/20 mb-8 overflow-hidden"><div class="scanner-bar"></div><i class="fas fa-microchip text-4xl text-cyan-400 absolute inset-0 flex items-center justify-center"></i></div><div id="l-stat" class="text-cyan-400 text-[10px] font-bold tracking-widest">VERIFYING UTR...</div></div>
-    <div id="success-overlay"><div class="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center animate-bounce mb-6"><i class="fas fa-check text-4xl text-white"></i></div><h2 class="text-2xl font-bold uppercase">Payment Successful</h2><p class="text-gray-500 text-sm mt-2">Redirecting to Admin...</p></div>
+    <div id="loader"><div class="relative w-48 h-48 border border-cyan-500/20 mb-8 overflow-hidden"><div class="scanner-bar"></div><i class="fas fa-network-wired text-4xl text-cyan-400 absolute inset-0 flex items-center justify-center"></i></div><div id="l-stat" class="text-cyan-400 text-[10px] font-bold tracking-widest uppercase">Validating Node...</div></div>
+    <div id="success-overlay"><div class="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center animate-bounce mb-6"><i class="fas fa-check text-4xl text-white"></i></div><h2 class="text-2xl font-bold uppercase tracking-tighter">Payment Success</h2><p class="text-gray-500 text-sm">Redirecting to Order Desk...</p></div>
 
     <div class="max-w-4xl mx-auto">
         <header class="flex justify-between items-center mb-10">
             <a href="index.html" class="text-cyan-400 font-bold text-xs uppercase"><i class="fas fa-arrow-left mr-2"></i> Exit</a>
-            <div class="text-right"><p class="text-[9px] text-gray-500 font-bold uppercase">Expires In</p><p id="timer" class="text-red-500 font-bold font-mono">03:00</p></div>
+            <div id="timer-box" class="text-right">
+                <p class="text-[10px] text-gray-600 font-bold uppercase">QR Expiry</p>
+                <p id="timer" class="text-red-500 font-bold font-mono">03:00</p>
+            </div>
         </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 relative">
-            <div id="offline-msg" class="offline-overlay hidden text-center"><h3 class="text-red-500 font-bold uppercase tracking-widest">Server Offline</h3></div>
+        <div id="all-offline" class="hidden glass p-12 text-center border-t-2 border-red-500">
+            <i class="fas fa-exclamation-triangle text-5xl text-red-500 mb-6 animate-pulse"></i>
+            <h2 class="text-2xl font-bold mb-2 uppercase">All Gateways Offline</h2>
+            <p class="text-gray-500 text-sm">Our payment servers are undergoing maintenance. Please contact <a href="https://t.me/SATYAM_FF_99" class="text-cyan-400 underline">Admin</a> for manual payment.</p>
+        </div>
+
+        <div id="checkout-container" class="grid grid-cols-1 lg:grid-cols-2 gap-8 relative">
             
             <div class="glass p-8 space-y-6">
-                <input type="number" id="qty" placeholder="Custom Quantity (e.g. 177)" oninput="calc()" class="w-full bg-black p-4 rounded-xl border border-white/10 outline-none text-cyan-400 font-bold">
-                <input type="url" id="link" placeholder="Channel Link" class="w-full bg-black p-4 rounded-xl border border-white/10 outline-none">
-                <select id="srv" onchange="calc()" class="w-full bg-black border border-white/10 p-4 rounded-xl outline-none"><option value="1">Server 01</option><option value="2">Server 02</option></select>
-                <input type="text" id="utr" placeholder="12-DIGIT UTR" maxlength="12" class="w-full bg-black border-2 border-cyan-500/30 p-4 rounded-xl text-center font-bold outline-none tracking-widest">
-                <button onclick="submit()" class="w-full bg-white text-black py-4 rounded-xl font-bold uppercase tracking-widest text-xs">Submit Payment</button>
+                <div>
+                    <label class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Select Plan</label>
+                    <select id="plan" onchange="calc()" class="w-full bg-black p-4 rounded-xl border border-white/10 outline-none text-white">
+                        <option value="1.5">BGMI Normal (₹1.5)</option>
+                        <option value="2.0">BGMI Premium (₹2.0)</option>
+                        <option value="1.5">Free Fire (₹1.5)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Enter Quantity</label>
+                    <input type="number" id="qty" placeholder="Min 10 - Max 1000" oninput="calc()" class="w-full bg-black p-4 rounded-xl border border-white/10 outline-none text-cyan-400 font-bold text-xl">
+                </div>
+
+                <div>
+                    <label class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Payment Server</label>
+                    <select id="srv" onchange="calc()" class="w-full bg-black border border-white/10 p-4 rounded-xl outline-none text-white font-bold">
+                        </select>
+                    <p id="srv-msg" class="text-[9px] text-orange-400 mt-2 font-bold uppercase italic"></p>
+                </div>
+
+                <input type="text" id="utr" placeholder="12-DIGIT TRANSACTION UTR" maxlength="12" class="w-full bg-black border-2 border-cyan-500/30 p-4 rounded-xl text-center font-bold outline-none tracking-widest">
+                <button onclick="submitOrder()" class="w-full bg-white text-black py-4 rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-cyan-400 transition-all">Submit Payment Proof</button>
             </div>
 
             <div class="glass p-8 flex flex-col items-center justify-center text-center">
-                <img id="qrImg" src="" class="w-44 h-44 p-2 bg-white rounded-xl mb-4">
-                <div id="price" class="text-5xl font-bold text-green-400 mb-6">₹0.0</div>
-                <div class="bg-cyan-500/5 p-4 rounded-xl w-full font-mono text-xs text-cyan-400" id="upiDisp">---</div>
+                <div class="relative bg-white p-3 rounded-2xl mb-6">
+                    <img id="qrImg" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=SelectPlan" class="w-44 h-44">
+                </div>
+                <div id="price" class="text-5xl font-bold text-green-400 mb-2 font-mono tracking-tighter">₹0.0</div>
+                <div class="text-[10px] text-gray-600 font-bold uppercase tracking-widest mb-6 italic">Scan & Pay Exact Amount</div>
+                
+                <div class="w-full bg-cyan-500/5 p-4 rounded-xl border border-cyan-500/10">
+                    <span class="text-[9px] text-gray-500 uppercase font-bold">Merchant UPI</span>
+                    <p id="upiDisp" class="text-xs font-mono text-cyan-400 truncate mt-1">---</p>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        let rate = 1.5, timeLeft = 180;
+        let timeLeft = 180;
+
+        function checkServers() {
+            const srv1 = localStorage.getItem('srv1_active') !== 'false';
+            const srv2 = localStorage.getItem('srv2_active') !== 'false';
+            const srvSelect = document.getElementById('srv');
+            const srvMsg = document.getElementById('srv-msg');
+
+            // Clear previous options
+            srvSelect.innerHTML = "";
+
+            if (!srv1 && !srv2) {
+                document.getElementById('checkout-container').style.display = 'none';
+                document.getElementById('timer-box').style.display = 'none';
+                document.getElementById('all-offline').classList.remove('hidden');
+                return;
+            }
+
+            if (srv1) {
+                let opt1 = document.createElement("option");
+                opt1.value = "1"; opt1.text = "Server 01 (Primary)";
+                srvSelect.add(opt1);
+            }
+
+            if (srv2) {
+                let opt2 = document.createElement("option");
+                opt2.value = "2"; opt2.text = "Server 02 (Secondary)";
+                srvSelect.add(opt2);
+            }
+
+            // Auto-switch if one is down
+            if (!srv1 && srv2) srvMsg.innerText = "⚠️ Server 01 Busy. Auto-Switched to Server 02.";
+            if (srv1 && !srv2) srvMsg.innerText = "⚠️ Server 02 Offline. Using Server 01.";
+        }
+
         function calc() {
-            const currentSrv = document.getElementById('srv').value;
-            const isMaint = localStorage.getItem('maintenance_active') === 'true';
-            if(isMaint) document.getElementById('maint-screen').classList.remove('hidden');
+            const rate = parseFloat(document.getElementById('plan').value);
+            const qtyBox = document.getElementById('qty');
+            let q = parseInt(qtyBox.value) || 0;
 
-            const isOff = localStorage.getItem(`srv${currentSrv}_active`) === 'false';
-            document.getElementById('offline-msg').classList.toggle('hidden', !isOff);
-
-            let q = parseInt(document.getElementById('qty').value) || 0;
-            if(q > 1000) q = 1000;
+            if (q > 1000) q = 1000;
             const total = q * rate;
             document.getElementById('price').innerText = '₹' + total.toFixed(1);
 
-            const upi = localStorage.getItem('upi'+currentSrv) || (currentSrv == 1 ? "bobby.jaiswal0893@okicici" : "Lavyanshboss@fam");
+            const activeSrv = document.getElementById('srv').value;
+            const upi = localStorage.getItem('upi' + activeSrv) || (activeSrv == 1 ? "bobby.jaiswal0893@okicici" : "Lavyanshboss@fam");
             document.getElementById('upiDisp').innerText = upi;
-            if(total > 0 && timeLeft > 0) document.getElementById('qrImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`upi://pay?pa=${upi}&am=${total.toFixed(1)}&cu=INR`)}`;
+
+            if (total > 0 && timeLeft > 0) {
+                const qrData = `upi://pay?pa=${upi}&pn=Satyamxnexus&am=${total.toFixed(1)}&cu=INR`;
+                document.getElementById('qrImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrData)}`;
+            }
         }
-        setInterval(() => { if(timeLeft > 0) { timeLeft--; let m = Math.floor(timeLeft/60), s = timeLeft%60; document.getElementById('timer').innerText = `${m}:${s.toString().padStart(2,'0')}`; } else { document.getElementById('qrImg').classList.add('qr-blurred'); } }, 1000);
-        function submit() {
+
+        // Timer and Submit logic (Same as previous versions)
+        setInterval(() => {
+            if (timeLeft > 0) {
+                timeLeft--;
+                let m = Math.floor(timeLeft/60), s = timeLeft%60;
+                document.getElementById('timer').innerText = `${m}:${s.toString().padStart(2,'0')}`;
+            } else {
+                document.getElementById('qrImg').classList.add('qr-blurred');
+            }
+        }, 1000);
+
+        function submitOrder() {
             if(document.getElementById('utr').value.length < 12) return alert("Enter valid 12-digit UTR!");
             document.getElementById('loader').style.display = 'flex';
             setTimeout(() => {
                 document.getElementById('loader').style.display = 'none';
                 document.getElementById('success-overlay').style.display = 'flex';
-                setTimeout(() => { window.location.href = document.getElementById('srv').value == 1 ? "https://t.me/SATYAM_FF_99" : "https://t.me/NexusMM"; }, 2500);
+                setTimeout(() => { 
+                    const s = document.getElementById('srv').value;
+                    window.location.href = (s == "1") ? "https://t.me/SATYAM_FF_99" : "https://t.me/NexusMM"; 
+                }, 2500);
             }, 3000);
         }
-        window.onload = calc;
+
+        window.onload = () => { checkServers(); calc(); };
     </script>
 </body>
 </html>
